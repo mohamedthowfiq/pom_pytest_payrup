@@ -1,0 +1,20 @@
+# Allure Reports
+AllureReport/
+
+# Python bytecode/cache
+__pycache__/
+*.pyc
+
+# pytest cache
+.pytest_cache/
+
+# Virtual environments (optional)
+env/
+venv/
+
+# Logs (optional)
+*.log
+
+# IDE folders (optional but recommended)
+.vscode/
+.idea/
