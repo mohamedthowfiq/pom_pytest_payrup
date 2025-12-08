@@ -13,22 +13,27 @@ class SignInPage(BasePage):
         # super().__init__(driver, timeout)
 
     def click_sign_in_btn(self):
-        self.click(self.sign_in_btn)
+        self.click(self.sign_in_btn)  # going to base_pge.py
 
     def send_mobile_number(self,mobile_number): # mobile_number is a argument which is expecting value 
-        self.send_keys(self.mobile_number_field,mobile_number)
+        self.send_keys(self.mobile_number_field,mobile_number)# going to base_pge.py
+
+    def get_entered_mobile_number(self):
+        """Return text currently present in the mobile number field."""
+        element = self.driver.find_element(*self.mobile_number_field)
+        return element.get_attribute("value")
 
     def check_box_check(self):
-        self.select(self.check_box)
+        self.select(self.check_box) # going to base_pge.py
     
     def click_get_otp_btn(self):
-        self.click(self.get_otp_btn)
+        self.click(self.get_otp_btn) # going to base_pge.py
     
     def send_otp(self,otp):
-        self.send_keys(self.otp_field,otp)
+        self.send_keys(self.otp_field,otp) # going to base_pge.py
 
     def display_warning_msg(self):
-        return self.text(self.warning_msg)
+        return self.text(self.warning_msg) # going to base_pge.py
     
     # def full_sigin_in_page(self,mobile_number,otp):
     #     self.click_sign_in_btn()
