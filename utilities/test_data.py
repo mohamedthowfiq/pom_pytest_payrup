@@ -5,7 +5,7 @@ class URLs:
 
 class SignInData:
     # common data
-    valid_mobile_number = "9066353121"
+    # valid_mobile_number = "9066353121"
     static_otp = "9999"
 
     # field validation numbers
@@ -20,8 +20,8 @@ class SignInData:
 
 
 signin_mobile_field__positive_cases = [
-    # ("TC_002", "accept numbers",                    SignInData.valid_mobile_number,        True),
-    ("TC_003", "accept exactly 10 digits",        SignInData.valid_mobile_number,        True),
+    ("TC_001", "redirects to Verify OTP box", SignInData.valid_mobile_number,   True),
+    ("TC_003", "accept exactly 10 digits",    SignInData.valid_mobile_number,   True),
 ]
 
 signin_mobile_field__negative_cases = [

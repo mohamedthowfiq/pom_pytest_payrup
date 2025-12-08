@@ -35,6 +35,7 @@ class SignInPage(BasePage):
     def display_warning_msg(self):
         return self.text(self.warning_msg) # going to base_pge.py
     
+    
     # def full_sigin_in_page(self,mobile_number,otp):
     #     self.click_sign_in_btn()
     #     self.send_mobile_number(self,mobile_number)

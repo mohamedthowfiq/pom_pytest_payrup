@@ -13,7 +13,7 @@ class BasePage:
         return WebDriverWait(self.driver, self.timeout)
 
     # Webdriver waiting methods
-    def wait_for_visible(self, locator):
+    def wait_for_visiblility(self, locator):
         return self.wait().until(EC.visibility_of_element_located(locator))
 
     def wait_for_clickable(self, locator):
@@ -52,10 +52,10 @@ class BasePage:
         return self.driver.title
 
     def text(self, locator):
-        return self.wait_for_visible(locator).text.strip()
+        return self.wait_for_visiblility(locator).text.strip()
 
     def get_attribute(self, locator, attribute_name):
-        return self.wait_for_visible(locator).get_attribute(attribute_name)
+        return self.wait_for_visiblility(locator).get_attribute(attribute_name)
 
     def current_url(self):
         return self.driver.current_url
@@ -63,13 +63,13 @@ class BasePage:
     # state checkers with proper exception handling
     def is_displayed(self, locator):
         try:
-            return self.wait_for_visible(locator).is_displayed()
+            return self.wait_for_visiblility(locator).is_displayed()
         except TimeoutException:
             return False
 
     def is_enabled(self, locator):
         try:
-            return self.wait_for_visible(locator).is_enabled()
+            return self.wait_for_visiblility(locator).is_enabled()
         except TimeoutException:
             return False
         
