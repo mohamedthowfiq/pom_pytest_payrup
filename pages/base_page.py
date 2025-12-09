@@ -84,4 +84,4 @@ class BasePage:
     def select(self, locator):
         if not self.is_selected(locator):
             self.click(locator)
-        return True
+        return self.is_selected(locator)

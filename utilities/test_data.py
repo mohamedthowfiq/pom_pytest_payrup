@@ -1,6 +1,7 @@
 # utilities/test_data.py
 class URLs:
     payrup = "https://payrup.com/"
+    terms_conditions = "https://payrup.com/terms-condition"
 
 
 class SignInData:
@@ -31,4 +32,24 @@ signin_mobile_field__negative_cases = [
     ("TC_007", "special characters not allowed",  SignInData.specialchar_mobile,         False),
     ("TC_008", "space not allowed",               SignInData.space_mobile,               False),
     ("TC_009", "blank not allowed",               SignInData.blank,                      False),
+]
+
+# ----------------- Terms & Conditions Test Cases -----------------
+
+# TC_010 → checkbox accepts CHECK when unchecked
+# TC_011 → checkbox accepts UNCHECK when checked
+terms_checkbox_cases = [
+    # tc_id,   description,                                   start_state, expected_state
+    ("TC_010", "checkbox accepts check when unchecked",       False,       True),
+    ("TC_011", "checkbox accepts uncheck when checked",       True,        False),
+]
+
+# TC_012 → clicking terms link redirects user to correct page
+terms_link_cases = [
+    ("TC_012", "terms link redirects to terms page", URLs.terms_conditions),
+]
+
+# TC_013 → Get OTP should be disabled when checkbox is unchecked
+terms_get_otp_cases = [
+    ("TC_013", "Get OTP disabled when T&C unchecked", False),
 ]
