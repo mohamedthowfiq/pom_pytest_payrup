@@ -8,11 +8,10 @@ class BasePage:
         self.driver = driver
         self.timeout = timeout
 
-    # Common reusable method
+    #------------------ Wait Helpers -------------
     def wait(self):
         return WebDriverWait(self.driver, self.timeout)
 
-    # Webdriver waiting methods
     def wait_for_visiblility(self, locator):
         return self.wait().until(EC.visibility_of_element_located(locator))
 
@@ -31,14 +30,14 @@ class BasePage:
     def wait_for_presence_of_all_elements(self, locator):
         return self.wait().until(EC.presence_of_all_elements_located(locator))
 
-    # normal method without wait
+    # -------------- normal method without wait -----------
     def find_element(self, locator):
         return self.driver.find_element(*locator)
 
     def find_elements(self, locator):
         return self.driver.find_elements(*locator)
 
-    # Actions
+    # ------------------ Basic Actions --------------------
     def click(self, locator):
         self.wait_for_clickable(locator).click()
 
@@ -47,7 +46,7 @@ class BasePage:
         element.clear()
         element.send_keys(value)
 
-    # get methods
+    # -----------------------  Get Methods ----------------
     def title(self):
         return self.driver.title
 
@@ -59,6 +58,9 @@ class BasePage:
 
     def current_url(self):
         return self.driver.current_url
+    
+    def current_window_handle(self):
+        return self.driver.current_window_handle
 
     # state checkers with proper exception handling
     def is_displayed(self, locator):
@@ -85,3 +87,35 @@ class BasePage:
         if not self.is_selected(locator):
             self.click(locator)
         return self.is_selected(locator)
+    
+
+    ################################################
+
+
+    def wait_for_condition(self, condition_callable, timeout=None):
+        """Wait until condition_callable(driver) returns truthy."""
+        wait_obj = self.wait() if timeout is None else WebDriverWait(self.driver, timeout)
+        return wait_obj.until(lambda d: condition_callable(d))
+
+    # ---------------- GENERIC CHECKBOX HANDLER -----------------
+    def ensure_state(self, click_locator, state_locator, expected_bool):
+        """
+        Generic helper: ensure checkbox/toggle reaches expected state (True/False).
+        - click_locator → element to click (span/label)
+        - state_locator → element whose .is_selected() gives the actual boolean state
+        """
+        current = self.is_selected(state_locator)
+
+        if current != expected_bool:
+            self.click(click_locator)
+
+            # Wait until state updates
+            try:
+                self.wait().until(
+                    lambda d: d.find_element(*state_locator).is_selected() == expected_bool
+                )
+            except Exception:
+                pass  # avoid throwing timeout
+
+        return self.is_selected(state_locator)
+

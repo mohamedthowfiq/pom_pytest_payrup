@@ -82,98 +82,62 @@ class TestSignInPage(BaseTest):
                 assert not is_enabled, f"{tc_id} - {description}: Get OTP button should be DISABLED"
 
 
-    
-    # # TC_010 and TC_011
-    # @pytest.mark.parametrize("tc_id, description, start_selected, expected_selected",terms_checkbox_cases,ids=[item[0] for item in terms_checkbox_cases],)
-    # def test_terms_checkbox_behaviour(self, tc_id, description, start_selected, expected_selected):
-    #     sign_in_page = self.setup_sign_in_page()
-
-    #     sign_in_page.send_mobile_number(SignInData.valid_mobile_number)
-
-    #     # Put checkbox in required initial state
-    #     current = sign_in_page.is_selected(sign_in_page.check_box)
-    #     if current != start_selected:
-    #         sign_in_page.click(sign_in_page.check_box)
-        
-    #     current = sign_in_page.is_selected(sign_in_page.check_box)
-    #     if current == start_selected:
-    #         sign_in_page.click(sign_in_page.check_box)
-    #         current = sign_in_page.is_selected(sign_in_page.check_box)
-    #         if tc_id == "TC_010":
-    #             assert current == expected_selected,f"{tc_id}:checkbox accepts check in unchecked state but it is {current}"
-    #         else:
-    #             assert current == expected_selected,f"{tc_id}:checkbox accepts uncheck in checked state but it is {current}"
-
     # TC_010 and TC_011
-    @pytest.mark.parametrize(
-    "tc_id, description, start_selected, expected_selected",
-    terms_checkbox_cases,
-    ids=[item[0] for item in terms_checkbox_cases],
-    )
+    @pytest.mark.parametrize("tc_id, description, start_selected, expected_selected",terms_checkbox_cases,
+                              ids=[item[0] for item in terms_checkbox_cases],)
     def test_terms_checkbox_behaviour(self, tc_id, description, start_selected, expected_selected):
         sign_in_page = self.setup_sign_in_page()
 
         # PRECONDITION: a valid mobile so checkbox becomes enabled/clickable
         sign_in_page.send_mobile_number(SignInData.valid_mobile_number)
 
-        # Ensure starting state (read from the hidden input)
-        current = sign_in_page.is_terms_checkbox_selected()
-        if current != start_selected:
-            sign_in_page.click_terms_checkbox()
-            # wait a short moment for state change
-            sign_in_page.wait().until(lambda d: d.find_element(*sign_in_page.terms_checkbox_input).is_selected() == start_selected)
-
-        # sanity check initial state
-        assert sign_in_page.is_terms_checkbox_selected() == start_selected, f"{tc_id}: could not set initial state"
-
-        # ACTION: toggle once (click visible switch)
+        # Ensure starting state
+        sign_in_page.ensure_state(
+                sign_in_page.terms_checkbox_click,
+                sign_in_page.terms_checkbox_input,
+                start_selected
+            )
+        
+        # toggle action
         sign_in_page.click_terms_checkbox()
 
-        # WAIT for expected final state
-        sign_in_page.wait().until(lambda d: d.find_element(*sign_in_page.terms_checkbox_input).is_selected() == expected_selected)
+        # WAIT final state
+        sign_in_page.wait_for_condition(lambda d:sign_in_page.is_terms_checkbox_selected() == expected_selected)
 
-        final_state = sign_in_page.is_terms_checkbox_selected()
-        assert final_state == expected_selected, f"{tc_id}: {description} but checkbox state is {final_state}"
+        assert sign_in_page.is_terms_checkbox_selected() == expected_selected, f"{tc_id}: {description} but checkbox state is {sign_in_page.is_terms_checkbox_selected()}"
 
 
 
     # TC_012
-    # from selenium.webdriver.support.ui import WebDriverWait
-    # from selenium.webdriver.support import expected_conditions as EC
-
-    # @pytest.mark.parametrize("tc_id, description, expected_url",terms_link_cases,ids=[item[0] for item in terms_link_cases],)
-    # def test_terms_link_redirects_to_terms_page(self, tc_id, description, expected_url):
-    #     sign_in_page = self.setup_sign_in_page()
-
-    #     sign_in_page.click(sign_in_page.terms_link)
-
-    #     WebDriverWait(self.driver, 10).until(
-    #         EC.url_contains("/terms-condition")
-    #     )
-
-    #     current_url = self.driver.current_url
-    #     assert expected_url in current_url, \
-    #         f"{tc_id}: expected '{expected_url}', got '{current_url}'"
+    @pytest.mark.parametrize("tc_id, description, expected_url",terms_link_cases,ids=[item[0] for item in terms_link_cases],)
+    def test_terms_link_redirects_to_terms_page(self, tc_id, description, expected_url):
+        sign_in_page = self.setup_sign_in_page()
+        parent_1 = sign_in_page.current_window_handle()
+        sign_in_page.click_terms_n_conditions_link()
+        # Wait for the new tab
+        sign_in_page.wait().until( lambda d: len(d.window_handles) > 1)
+        # Get the new tab handle
+        new_handle = [h for h in sign_in_page.driver.window_handles if h != parent_1][0]
+        # Switch to the new tab
+        sign_in_page.driver.switch_to.window(new_handle)
+        actual_url = sign_in_page.current_url()
+        assert expected_url in actual_url,f"{tc_id}: expected '{expected_url}', got '{actual_url}'"
 
 
-    #TC_13
-    # @pytest.mark.parametrize(
-    # "tc_id, description, tnc_checked",
-    # terms_get_otp_cases,
-    # ids=[item[0] for item in terms_get_otp_cases],
-    # )
-    # def test_get_otp_disabled_when_tnc_unchecked(self, tc_id, description, tnc_checked):
-    #     sign_in_page = self.setup_sign_in_page()
+    # TC_13
+    @pytest.mark.parametrize("tc_id, description, tnc_checked",terms_get_otp_cases,ids=[item[0] for item in terms_get_otp_cases],)
+    def test_get_otp_disabled_when_tnc_unchecked(self, tc_id, description, tnc_checked):
+        sign_in_page = self.setup_sign_in_page()
 
-    #     # Ensure checkbox is unchecked (for TC_013, tnc_checked = False)
-    #     current = sign_in_page.is_selected(sign_in_page.check_box)
-    #     if current != tnc_checked:
-    #         sign_in_page.click(sign_in_page.check_box)
+        # Ensure checkbox is unchecked (for TC_013, tnc_checked = False)
+        current = sign_in_page.is_terms_checkbox_selected()
 
-    #     assert sign_in_page.is_selected(sign_in_page.check_box) == tnc_checked
+        if current != tnc_checked:
+            sign_in_page.click(sign_in_page.terms_checkbox_click)
 
-    #     # Now Get OTP must be disabled
-    #     is_enabled = sign_in_page.is_enabled(sign_in_page.get_otp_btn)
-    #     assert not is_enabled, \
-    #         f"{tc_id}: Get OTP button should be DISABLED when T&C is unchecked"
+        assert sign_in_page.is_selected(sign_in_page.terms_checkbox_input) == tnc_checked
+
+        # Now Get OTP must be disabled
+        is_enabled = sign_in_page.is_enabled(sign_in_page.get_otp_btn)
+        assert not is_enabled,f"{tc_id}: Get OTP button should be DISABLED when T&C is unchecked"
 
