@@ -1,6 +1,7 @@
 from pages.base_page import BasePage
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 class SignInPage(BasePage):
@@ -113,4 +114,30 @@ class SignInPage(BasePage):
         minutes, seconds = time_str.split(":")
         return int(minutes) * 60 + int(seconds)
 
+
+    def get_visible_otp_message(self, timeout=3):
+        """
+        Returns the currently visible OTP-related message text
+        (success / invalid / lock message).
+        """
+        try:
+            elements = WebDriverWait(self.driver, timeout).until(
+                lambda d: d.find_elements(
+                    By.XPATH,
+                    "//form[contains(@class,'Signin_customform')]//p[normalize-space()]"
+                )
+            )
+        except TimeoutException:
+            return None
+
+        for el in elements:
+            try:
+                if el.is_displayed():
+                    text = el.text.strip()
+                    if text:
+                        return text
+            except Exception:
+                continue
+
+        return None
     

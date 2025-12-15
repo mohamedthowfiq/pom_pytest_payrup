@@ -3,6 +3,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
+import os
+from datetime import datetime
+
 
 class BasePage:
     def __init__(self, driver, timeout=10):
@@ -183,4 +186,34 @@ class BasePage:
                 self.driver.execute_script("arguments[0].click();", el)
             except Exception:
                 raise  # re-raise so test fails loudly if truly not clickable
+
+
+
+
+    def step(self, tc_id: str, step_name: str):
+        import os
+        import allure
+
+        base_dir = "screenshots"
+        tc_dir = os.path.join(base_dir, tc_id)
+        os.makedirs(tc_dir, exist_ok=True)
+
+        if not hasattr(self, "_step_counter"):
+            self._step_counter = 1
+
+        file_name = f"{self._step_counter:02d}_{step_name}.png"
+        file_path = os.path.join(tc_dir, file_name)
+
+        # Take screenshot
+        self.driver.save_screenshot(file_path)
+
+        # Attach to Allure
+        allure.attach.file(
+            file_path,
+            name=f"{tc_id} - {step_name}",
+            attachment_type=allure.attachment_type.PNG
+        )
+
+        print(f"📸 Screenshot saved & attached: {file_path}")
+        self._step_counter += 1
 

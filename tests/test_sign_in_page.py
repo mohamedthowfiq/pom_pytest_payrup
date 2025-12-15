@@ -36,22 +36,38 @@ class TestSignInPage(BaseTest):
 
     # Positive cases
     # 🔽 NEW: one parametrized test for multiple test cases (TC_001 and TC_002)
-    @pytest.mark.parametrize("tc_id,description,mobile_number,should_enable_otp",
-                             signin_mobile_field__positive_cases,
-                             ids =[item[0] for item in signin_mobile_field__positive_cases])
-    def test_mobile_number_field_positive_validation(self,tc_id,description,mobile_number,should_enable_otp):
+    @pytest.mark.parametrize(
+    "tc_id,description,mobile_number,should_enable_otp",
+    signin_mobile_field__positive_cases,
+    ids=[item[0] for item in signin_mobile_field__positive_cases])
+    def test_mobile_number_field_positive_validation(self, tc_id, description, mobile_number, should_enable_otp):
         sign_in_page = self.setup_sign_in_page()
+        sign_in_page._step_counter = 1
+
         sign_in_page.send_mobile_number(mobile_number)
+        sign_in_page.step(tc_id, "mobile_number_entered")
+
         sign_in_page.check_box_check()
+        sign_in_page.step(tc_id, "terms_checked")
 
         if tc_id == "TC_001":
             sign_in_page.click_get_otp_btn()
+            sign_in_page.step(tc_id, "get_otp_clicked")
+
             actual_heading = sign_in_page.get_otp_box_heading()
-            expected_heading = "Verify OTP"
-            assert actual_heading == expected_heading, f"Expected '{expected_heading}', but got '{actual_heading}'"
+            sign_in_page.step(tc_id, "verify_otp_page_displayed")
+
+            assert actual_heading == "Verify OTP", (
+                f"Expected 'Verify OTP', but got '{actual_heading}'"
+            )
         else:
             is_enabled = sign_in_page.is_enabled(sign_in_page.get_otp_btn)
-            assert is_enabled,f"{tc_id} - {description}: Get OTP button should be enabled"
+            sign_in_page.step(tc_id, "get_otp_button_enabled")
+
+            assert is_enabled, (
+                f"{tc_id} - {description}: Get OTP button should be enabled"
+            )
+
 
 
 
@@ -278,7 +294,7 @@ class TestSignInPage(BaseTest):
         if tc_id == "TC_024":
             driver = sign_in_page.driver
 
-            # 1) Wait until timer becomes 00:00 (allow up to 75 seconds)
+            # 1️⃣ Wait until timer becomes 00:00
             try:
                 WebDriverWait(driver, 75, poll_frequency=0.5).until(
                     lambda d: sign_in_page.text(sign_in_page.countdown_timer).strip() == "00:00"
@@ -286,46 +302,67 @@ class TestSignInPage(BaseTest):
             except TimeoutException:
                 raise AssertionError(f"{tc_id}: Timer did not reach 00:00 within timeout.")
 
-            # Sanity: confirm timer is zero
-            assert sign_in_page.text(sign_in_page.countdown_timer).strip() == "00:00", f"{tc_id}: Timer expected 00:00"
+            assert sign_in_page.text(sign_in_page.countdown_timer).strip() == "00:00", \
+                f"{tc_id}: Timer expected 00:00"
 
-            # 2) Click Resend OTP (use safe_click if available; click fallback OK)
+            # 2️⃣ Click Resend OTP
             try:
-                # prefer safe_click (backs off overlays + JS fallback)
                 if hasattr(sign_in_page, "safe_click"):
                     sign_in_page.safe_click(sign_in_page.resend_otp, timeout=5)
                 else:
                     sign_in_page.click(sign_in_page.resend_otp)
             except WebDriverException:
-                # if native click fails, try JS click as last resort
-                try:
-                    el = sign_in_page.find(sign_in_page.resend_otp, timeout=3)
-                    driver.execute_script("arguments[0].click();", el)
-                except Exception as e:
-                    raise AssertionError(f"{tc_id}: Could not click Resend OTP: {e}")
+                el = sign_in_page.find(sign_in_page.resend_otp, timeout=3)
+                driver.execute_script("arguments[0].click();", el)
 
-            # 3) Wait briefly for UI to react, then read timer again
-            time.sleep(1.2)  # allow UI/network to update
+            # 3️⃣ Wait for UI update and validate timer reset
+            time.sleep(1.2)
 
             timer_after = sign_in_page.text(sign_in_page.countdown_timer).strip()
             secs_after = timer_to_seconds(timer_after)
-            assert secs_after > 0, f"{tc_id}: After clicking Resend OTP at 00:00 expected timer to reset (>0), but found '{timer_after}'"
+            assert secs_after > 0, \
+                f"{tc_id}: After resend, timer should reset (>0), but found '{timer_after}'"
 
-            # 4) Optional stronger verification:
-            #  - If your app shows a toast/message like "OTP sent" after resend, assert it appears.
-            #    Replace the locator below with the real one if available.
-            # try:
-            #     toast_text = sign_in_page.text((By.CSS_SELECTOR, ".toast, .MuiSnackbar-root"), timeout=5)
-            #     assert "OTP sent" in toast_text or "sent" in toast_text.lower(), f"{tc_id}: Expected OTP confirmation toast, found '{toast_text}'"
-            # except TimeoutException:
-            #     # toast not present — it's okay if timer reset is your primary signal
-            #     pass
+            # 🔴 🔴 🔴 PLACE MESSAGE VALIDATION RIGHT HERE 🔴 🔴 🔴
+            msg = sign_in_page.get_visible_otp_message()
+            assert msg == "OTP sent to your number successfully.", \
+                f"{tc_id}: Expected OTP success message, but got '{msg}'"
 
-            # 5) Final guard: Verify button should be disabled/enabled per app behaviour after resend.
-            # If the Verify button should remain disabled until user enters new OTP, assert that.
-            assert not sign_in_page.is_enabled(sign_in_page.verify_btn), f"{tc_id}: Verify button expected to be disabled after resend (adjust if app enables it)"
+            # 4️⃣ Final guard: Verify button state
+            assert not sign_in_page.is_enabled(sign_in_page.verify_btn), \
+                f"{tc_id}: Verify button expected to be disabled after resend"
 
             return
+        
+        # if tc_id == "TC_025":
+        #     invalid_otp = value
+        #     lock_msg = "please try again after 1 hour"
+
+        #     # Enter OTP once
+        #     sign_in_page.send_keys(sign_in_page.otp_field, invalid_otp)
+
+        #     max_attempts = 10
+        #     msg = None
+
+        #     for _ in range(max_attempts):
+        #         # RAPID click (no sleep)
+        #         try:
+        #             sign_in_page.click(sign_in_page.verify_btn)
+        #         except Exception:
+        #             pass
+
+        #         msg = sign_in_page.get_visible_otp_message()
+
+        #         if msg == lock_msg:
+        #             break
+
+        #     assert msg == lock_msg, \
+        #         f"{tc_id}: Expected lock message '{lock_msg}', but got '{msg}'"
+
+        #     return
+
+
+
         
 
 
