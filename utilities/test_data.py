@@ -53,3 +53,22 @@ terms_link_cases = [
 terms_get_otp_cases = [
     ("TC_012", "Get OTP disabled when T&C unchecked", False),
 ]
+
+# Example param list for a subset — expand to all TC_013..TC_021
+verify_otp_positive_cases = [
+    ("TC_013", "verify OTP box appears after clicking Get OTP", None),
+    ("TC_014", "verify input field accepts numeric", "123"),
+    ("TC_015", "verify valid OTP logs in", "VALID_OTP_PLACEHOLDER"),
+]
+verify_otp_negative_cases = [
+    ("TC_016", "verify input field should not accept alphabets", "abc"),
+    ("TC_017", "verify input field should not accept special characters", "@#$"),
+    ("TC_018", "verify input field should not accept space", "1 2 3"),
+    ("TC_019", "verify blank input -> verify button disabled", ""),
+    ("TC_020", "verify input field accept 3 digit number", "123"),
+    ("TC_021", "verify input field should not accept 5 digit number", "12345"),
+    ("TC_022", "verify input field should not accept invalid 4 digit OTP", "1111"),
+    ("TC_023", "verify resend OTP link is disabled while timer is not 00:00", None),
+    ("TC_024", "verify resend OTP sends new OTP after timer becomes 00:00", None),
+    # ("TC_025", "verify Verify button shows error when clicked repeatedly with invalid 4-digit OTP", "1111"),
+]

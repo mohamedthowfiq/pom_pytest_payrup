@@ -1,7 +1,12 @@
 from pages.base_page import BasePage
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
+
 
 class SignInPage(BasePage):
+
+    #sign in box
+    heading_of_signin_box = (By.XPATH,"//h2[text()='Sign in to payRup']")
     sign_in_btn = (By.XPATH,"(//h5[text()='Sign in'])[2]")
     mobile_number_field = (By.XPATH,"//input[@type='number']")
     # VISIBLE clickable element (label/span) - click this
@@ -10,12 +15,28 @@ class SignInPage(BasePage):
     terms_checkbox_input = (By.XPATH, "//input[contains(@class,'PrivateSwitchBase-input')]")
     terms_n_conditions_link = (By.XPATH,"//u[text()='terms & conditions']/..")
     get_otp_btn = (By.XPATH,"//button[text()='Get OTP']")
-    otp_field = (By.XPATH,"//form[contains(@class,'Signin_customform')]//input[@type='number']")
-    warning_msg = (By.XPATH,"(//form[contains(@class,'Signin_customform')]//p[2])[1]")
+
+    #verify otp box
+    heading_of_otp_box = (By.XPATH, "//h2[text()='Verify OTP']")
+    edit_icon = (By.XPATH,"//img[@alt = 'Edit']/..")
+    otp_field = (By.XPATH,"//input[@type='number' and contains(@class,'MuiInputBase-input')]")
+    def warning_msg(self, message):
+            return (By.XPATH,f"//form[contains(@class,'Signin_customform')]//p[normalize-space(text())='{message}']")
+    countdown_timer = (By.XPATH,"//b[contains(@class,'Signin_otpText')]") 
+    resend_otp = (By.XPATH,"//a[text()='Resend OTP']")
+    verify_btn = (By.XPATH,"//button[text()='Verify']")
+    
+#    Invalid OTP!        OTP sent to your number successfully.
+   
 
 
     def __init__(self, driver, timeout=10):
         super().__init__(driver, timeout)
+
+    def get_signin_box_heading(self, timeout=10):
+        """Return text currently present in the page heading."""
+        signin_box_heading = self.text(self.heading_of_signin_box)
+        return signin_box_heading
 
     def click_sign_in_btn(self):
         self.click(self.sign_in_btn)  # going to base_pge.py
@@ -25,8 +46,7 @@ class SignInPage(BasePage):
 
     def get_entered_mobile_number(self):
         """Return text currently present in the mobile number field."""
-        element = self.driver.find_element(*self.mobile_number_field)
-        return element.get_attribute("value")
+        return self.get_attribute(self.mobile_number_field,"value")
     
     # ------------------ Clean Checkbox Wrappers ---------------------------------------------------------
     def click_terms_checkbox(self):
@@ -62,7 +82,35 @@ class SignInPage(BasePage):
     def send_otp(self,otp):
         self.send_keys(self.otp_field,otp) # going to base_pge.py
 
-    def display_warning_msg(self):
-        return self.text(self.warning_msg) # going to base_pge.py
+    def display_warning_msg(self,message):
+        return self.text(self.warning_msg(message)) # going to base_pge.py
     
+
+
+    # verify otp box
+
+    def get_otp_box_heading(self, timeout=10):
+        """Return text currently present in the page heading."""
+        otp_box_heading = self.text(self.heading_of_otp_box)
+        return otp_box_heading
+
+    def click_edit_icon(self):
+        return self.click(self.edit_icon)
+    
+    def get_entered_otp_number(self):
+        """Return text currently present in the otp field.""" 
+        return self.get_attribute(self.otp_field,"value")
+    
+
+    
+
+
+    def get_countdown_text(self):
+        return self.text(self.countdown_timer)
+    
+
+    def countdown_to_seconds(self, time_str):
+        minutes, seconds = time_str.split(":")
+        return int(minutes) * 60 + int(seconds)
+
     
