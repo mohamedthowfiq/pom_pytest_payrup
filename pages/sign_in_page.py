@@ -140,4 +140,3 @@ class SignInPage(BasePage):
                 continue
 
         return None
-    
