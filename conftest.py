@@ -7,19 +7,20 @@ from utilities.test_data import URLs
 
 @pytest.fixture(params=["chrome"])
 def initialize_driver(request):
-    if request.param == "chrome":
-        options = Options()
 
-        # Only enable headless in GitHub Actions
-        if os.getenv("CI") == "true":
-            options.add_argument("--headless=new")
-            options.add_argument("--no-sandbox")
-            options.add_argument("--disable-dev-shm-usage")
-            options.add_argument("--window-size=1920,1080")
+    options = Options()
 
-        driver = webdriver.Chrome(options=options)
+    # Run headless only in GitHub Actions
+    if os.getenv("CI") == "true":
+        options.add_argument("--headless=new")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--window-size=1920,1080")
+
+    driver = webdriver.Chrome(options=options)
 
     request.cls.driver = driver
+
     print("Browser:", request.param)
 
     driver.get(URLs.payrup)
