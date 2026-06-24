@@ -31,7 +31,7 @@ def pytest_runtest_makereport(item, call):
     report = outcome.get_result()
 
     # Only after test execution
-    if report.when == "call":
+    if report.when == "call": 
         driver = getattr(item.cls, "driver", None)
         if driver is None:
             return
@@ -51,5 +51,5 @@ def pytest_runtest_makereport(item, call):
 
         driver.save_screenshot(file_path)
         print(f"\n📸 Screenshot saved: {file_path}")
-        
+
 
