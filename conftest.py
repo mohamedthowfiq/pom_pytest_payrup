@@ -51,4 +51,5 @@ def pytest_runtest_makereport(item, call):
 
         driver.save_screenshot(file_path)
         print(f"\n📸 Screenshot saved: {file_path}")
+        
 
