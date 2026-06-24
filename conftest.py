@@ -1,12 +1,21 @@
 import pytest
 from selenium import webdriver
 from utilities.test_data import URLs
+from selenium.webdriver.chrome.options import Options
 
 
 # @pytest.fixture(params=["chrome","firefox","edge"])
 @pytest.fixture(params=["chrome"])
 def initialize_driver(request):
   if request.param == "chrome":
+      # options = Options()
+
+      # options.add_argument("--headless=new")
+      # options.add_argument("--no-sandbox")
+      # options.add_argument("--disable-dev-shm-usage")
+      # options.add_argument("--window-size=1920,1080")
+
+      # driver = webdriver.Chrome(options=options)
     driver = webdriver.Chrome()
   # elif request.param == "firefox":
   #   driver = webdriver.Firefox()
@@ -19,7 +28,7 @@ def initialize_driver(request):
 
   yield
   print("Close driver")
-  driver.close() 
+  driver.quit() 
 
 
 import os
